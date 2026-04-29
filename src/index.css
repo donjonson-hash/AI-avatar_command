@@ -1,0 +1,164 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 220 30% 5%;
+    --foreground: 210 40% 98%;
+    --card: 220 20% 12%;
+    --card-foreground: 210 40% 98%;
+    --popover: 220 20% 12%;
+    --popover-foreground: 210 40% 98%;
+    --primary: 165 100% 42%;
+    --primary-foreground: 220 30% 5%;
+    --secondary: 220 13% 25%;
+    --secondary-foreground: 210 40% 98%;
+    --muted: 220 13% 25%;
+    --muted-foreground: 220 9% 55%;
+    --accent: 270 100% 74%;
+    --accent-foreground: 210 40% 98%;
+    --destructive: 355 78% 56%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 220 13% 25%;
+    --input: 220 13% 25%;
+    --ring: 165 100% 42%;
+    --radius: 0.625rem;
+    --sidebar-background: 220 20% 8%;
+    --sidebar-foreground: 210 40% 98%;
+    --sidebar-primary: 165 100% 42%;
+    --sidebar-primary-foreground: 220 30% 5%;
+    --sidebar-accent: 220 13% 25%;
+    --sidebar-accent-foreground: 210 40% 98%;
+    --sidebar-border: 220 13% 20%;
+    --sidebar-ring: 165 100% 42%;
+  }
+
+  body {
+    @apply bg-syndi-bg text-syndi-text-primary antialiased;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Space Grotesk', 'Inter', sans-serif;
+    letter-spacing: -0.02em;
+  }
+}
+
+@layer components {
+  .btn-primary {
+    @apply bg-syndi-teal text-syndi-bg font-medium px-6 py-3 rounded-lg transition-all duration-200 hover:brightness-110;
+  }
+
+  .btn-secondary {
+    @apply bg-transparent border border-syndi-border text-syndi-text-primary font-medium px-6 py-3 rounded-lg transition-all duration-200 hover:border-syndi-teal hover:text-syndi-teal;
+  }
+
+  .btn-ghost {
+    @apply bg-transparent text-syndi-text-secondary font-medium px-6 py-3 rounded-lg transition-all duration-200 hover:text-syndi-text-primary;
+  }
+
+  .card-syndi {
+    @apply bg-syndi-surface border border-syndi-border rounded-xl p-6 transition-all duration-300;
+  }
+
+  .card-syndi:hover {
+    @apply border-syndi-teal/50;
+    box-shadow: 0 4px 24px rgba(0, 212, 170, 0.08);
+  }
+
+  .input-syndi {
+    @apply bg-syndi-bg-elevated border border-syndi-border rounded-lg px-4 py-3 text-syndi-text-primary placeholder-syndi-text-muted focus:outline-none focus:border-syndi-teal transition-all;
+    box-shadow: 0 0 0 0 rgba(0, 212, 170, 0);
+  }
+
+  .input-syndi:focus {
+    box-shadow: 0 0 0 3px rgba(0, 212, 170, 0.15);
+  }
+
+  .gradient-border {
+    position: relative;
+    background: linear-gradient(syndi-bg, syndi-bg) padding-box,
+                linear-gradient(var(--angle, 0deg), syndi-teal, syndi-violet) border-box;
+    border: 2px solid transparent;
+    animation: rotate-gradient 3s linear infinite;
+  }
+
+  .text-gradient-teal {
+    @apply bg-clip-text text-transparent;
+    background-image: linear-gradient(135deg, #00d4aa, #2ec4b6);
+  }
+
+  .glow-teal {
+    box-shadow: 0 0 20px rgba(0, 212, 170, 0.3);
+  }
+
+  .glow-violet {
+    box-shadow: 0 0 20px rgba(199, 125, 255, 0.3);
+  }
+
+  .glow-pink {
+    box-shadow: 0 0 20px rgba(255, 107, 157, 0.3);
+  }
+
+  .shimmer-bg {
+    background: linear-gradient(90deg, #1f2937 25%, #374151 50%, #1f2937 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+  }
+}
+
+@layer utilities {
+  .animation-delay-100 {
+    animation-delay: 100ms;
+  }
+  .animation-delay-200 {
+    animation-delay: 200ms;
+  }
+  .animation-delay-300 {
+    animation-delay: 300ms;
+  }
+  .animation-delay-400 {
+    animation-delay: 400ms;
+  }
+  .animation-delay-500 {
+    animation-delay: 500ms;
+  }
+  .animation-delay-1000 {
+    animation-delay: 1000ms;
+  }
+  .animation-delay-2000 {
+    animation-delay: 2000ms;
+  }
+  .animation-delay-3000 {
+    animation-delay: 3000ms;
+  }
+  .animation-delay-4000 {
+    animation-delay: 4000ms;
+  }
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #0a0e17;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #374151;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #4b5563;
+}
+
+/* Selection */
+::selection {
+  background: rgba(0, 212, 170, 0.3);
+  color: #f9fafb;
+}

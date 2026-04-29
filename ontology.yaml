@@ -1,0 +1,162 @@
+# =============================================================
+# Syndi AI — Ontology Manifest (Palantir AIP principle)
+# Единый язык для всех AI-агентов и сервисов
+# =============================================================
+
+version: "1.0.0"
+project: "SyndiAI"
+
+# ─────────────────────────────────────────────
+# ENTITIES — объекты реального мира
+# ─────────────────────────────────────────────
+entities:
+
+  User:
+    description: "Пользователь платформы — основная сущность"
+    fields:
+      id:           { type: uuid,    required: true }
+      name:         { type: string,  required: true }
+      email:        { type: string,  required: true, sensitive: true }
+      role:         { type: enum,    values: [Founder, Developer, Designer, Investor] }
+      avatar_url:   { type: string }
+      location:     { type: string }
+      bio:          { type: string }
+      skills:       { type: array,   items: string }
+      ocean_scores: { type: object,  fields: [O, C, E, A, N], range: [0, 100] }
+      created_at:   { type: datetime }
+    sensitive_fields: [email]  # агенты не видят без явного разрешения
+
+  Match:
+    description: "Результат алгоритма совместимости между двумя пользователями"
+    fields:
+      id:                  { type: uuid }
+      user_a_id:           { type: uuid, ref: User }
+      user_b_id:           { type: uuid, ref: User }
+      compatibility_score: { type: float, range: [0, 1] }
+      status:              { type: enum, values: [pending, liked_a, liked_b, mutual, skipped] }
+      created_at:          { type: datetime }
+
+  Chat:
+    description: "Диалог между двумя взаимно совпавшими пользователями"
+    fields:
+      id:         { type: uuid }
+      match_id:   { type: uuid, ref: Match }
+      created_at: { type: datetime }
+
+  Message:
+    description: "Сообщение в чате"
+    fields:
+      id:           { type: uuid }
+      chat_id:      { type: uuid, ref: Chat }
+      sender_id:    { type: uuid, ref: User }
+      content:      { type: string }
+      suggested_by: { type: enum, values: [user, avatar_agent], nullable: true }
+      confirmed_by_human: { type: boolean, default: false }
+      timestamp:    { type: datetime }
+
+  AuditLog:
+    description: "Неизменяемый журнал всех действий агентов"
+    fields:
+      id:         { type: uuid }
+      agent_id:   { type: string }
+      action:     { type: string }
+      target_id:  { type: uuid }
+      payload:    { type: jsonb }
+      status:     { type: enum, values: [success, failed, pending_human] }
+      timestamp:  { type: datetime }
+
+# ─────────────────────────────────────────────
+# ACTIONS — разрешённые действия (через Action Service)
+# ─────────────────────────────────────────────
+actions:
+
+  # User actions
+  update_profile:
+    entity: User
+    allowed_agents: [user_self]
+    human_in_loop: false
+    description: "Обновление собственного профиля"
+
+  delete_account:
+    entity: User
+    allowed_agents: [user_self]
+    human_in_loop: true   # ← необратимо — требует подтверждения
+    description: "Удаление аккаунта"
+
+  # Match actions
+  like_match:
+    entity: Match
+    allowed_agents: [user_self, match_agent]
+    human_in_loop: false
+    description: "Поставить лайк совпадению"
+
+  skip_match:
+    entity: Match
+    allowed_agents: [user_self, match_agent]
+    human_in_loop: false
+    description: "Пропустить совпадение"
+
+  create_chat:
+    entity: Chat
+    allowed_agents: [system]
+    human_in_loop: false
+    trigger: "mutual like между user_a и user_b"
+    description: "Создать чат после взаимного лайка"
+
+  # Message actions
+  send_message:
+    entity: Message
+    allowed_agents: [user_self]
+    human_in_loop: false
+    description: "Отправить сообщение от лица пользователя"
+
+  ai_suggest_reply:
+    entity: Message
+    allowed_agents: [avatar_agent]
+    human_in_loop: true   # ← агент предлагает, человек подтверждает
+    description: "AI-предложение ответа (не отправляется без подтверждения)"
+
+  # System / Orchestrator
+  recalculate_matches:
+    entity: Match
+    allowed_agents: [orchestrator_agent]
+    human_in_loop: false
+    description: "Пересчитать матчи при появлении нового пользователя"
+
+# ─────────────────────────────────────────────
+# AGENTS — зарегистрированные агенты
+# ─────────────────────────────────────────────
+agents:
+
+  user_self:
+    level: 0
+    description: "Сам пользователь через клиент"
+    auth: jwt
+
+  ocean_agent:
+    level: 1   # Thread — только RAG, без мутаций
+    description: "Отвечает на вопросы о OCEAN-профиле пользователя"
+    allowed_reads: [User.ocean_scores, User.name, User.role]
+    allowed_writes: []
+    auth: api_key
+
+  avatar_agent:
+    level: 2   # Agent — может читать историю, предлагать ответы
+    description: "Генерирует suggested replies в чате"
+    allowed_reads: [Message, Chat, User.name, User.role, User.ocean_scores]
+    allowed_writes: [ai_suggest_reply]  # только через human_in_loop
+    auth: api_key
+
+  match_agent:
+    level: 2   # Agent — рассчитывает совместимость
+    description: "Рассчитывает и обновляет матчи"
+    allowed_reads: [User.ocean_scores, User.role, User.skills, Match]
+    allowed_writes: [like_match, skip_match]
+    auth: api_key
+
+  orchestrator_agent:
+    level: 3   # Agentic App — управляет другими агентами
+    description: "Manager Agent — запускает match_agent при новых регистрациях"
+    allowed_reads: [User, Match]
+    allowed_writes: [recalculate_matches]
+    auth: api_key

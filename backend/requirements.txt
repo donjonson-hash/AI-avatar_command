@@ -1,0 +1,22 @@
+# Syndi-AI — embed_server dependencies
+# Install: pip install -r requirements.txt
+
+# Web framework
+fastapi>=0.111.0
+uvicorn[standard]>=0.29.0
+python-multipart>=0.0.9
+
+# Embeddings
+sentence-transformers>=3.0.0
+torch>=2.2.0          # CPU-only: pip install torch --index-url https://download.pytorch.org/whl/cpu
+transformers>=4.40.0
+numpy>=1.26.0
+
+# Vector database
+qdrant-client>=1.9.0
+
+# Config
+python-dotenv>=1.0.0
+
+# Optional: faster tokenization
+tokenizers>=0.19.0
